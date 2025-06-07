@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 79
+skip-string-normalization = 1
+target-version = ['py39']
+
+[tool.isort]
+py_version = 39
+src_paths = ['django_backend', 'shop_bot']
+profile = 'black'
+skip = ['migrations', 'venv', 'requests.py']
+line_length=79
