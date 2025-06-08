@@ -63,3 +63,16 @@ class ForecastWriteSerializer(DateSerializer, serializers.ModelSerializer):
                     'max_temperature.'
                 }
             )
+        return data
+
+    def create(self, validated_data):
+        instance, created = Forecast.objects.update_or_create(
+            city=validated_data['city'],
+            date=validated_data['date'],
+            defaults={
+                'min_temperature': validated_data['min_temperature'],
+                'max_temperature': validated_data['max_temperature'],
+            },
+        )
+        self.context.update({'created': created})
+        return instance
