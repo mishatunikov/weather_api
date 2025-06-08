@@ -154,7 +154,7 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
         serializer.is_valid(raise_exception=True)
 
         forecast_response = Forecast.objects.filter(
-            name=city, date=datetime.strptime(date, consts.DATE_FORMAT)
+            city=city, date=datetime.strptime(date, consts.DATE_FORMAT)
         )
 
         if forecast_response.exists():
@@ -186,4 +186,8 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
         serializer = ForecastWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        if not serializer.context.get('created'):
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
