@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.validators import ValidationError
+from rest_framework.validators import UniqueTogetherValidator, ValidationError
 
 from api import consts
 from weather.models import Forecast
@@ -53,4 +53,10 @@ class ForecastWriteSerializer(DateSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Forecast
-        fields = ('name', 'date', 'min_temperature', 'max_temperature')
+        fields = ('city', 'date', 'min_temperature', 'max_temperature')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Forecast.objects.all(),
+                fields=('city', 'date')
+            )
+        ]
