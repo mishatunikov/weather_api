@@ -1,9 +1,10 @@
 from datetime import timedelta
 
-from api import consts
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
+
+from api import consts
 
 
 class ForecastGetSerializer(serializers.Serializer):
@@ -31,5 +32,5 @@ class ForecastGetSerializer(serializers.Serializer):
         return value
 
 
-class ForecastCreateSerializer(serializers.Serializer):
+class ForecastCreateSerializer(serializers.ModelSerializer):
     pass

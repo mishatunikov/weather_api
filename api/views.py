@@ -1,14 +1,16 @@
 import requests
-from api.exeptions import LocationError
-from api.serializers import ForecastGetSerializer
 from django.utils import timezone
 from geopy.geocoders import Nominatim
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.exeptions import LocationError
+from api.serializers import ForecastGetSerializer
+
 
 class BaseWeatherMixin:
+    """Mixin to work with weather forecast through open-meteo."""
 
     @staticmethod
     def get_forecast(city_name: str, days_count: int):
@@ -97,6 +99,8 @@ class BaseWeatherMixin:
 
 
 class CurrentWeatherView(BaseWeatherMixin, APIView):
+    """View for precessing requests for current weather."""
+
     def get(self, request):
         city = request.query_params.get('city')
 
@@ -124,6 +128,7 @@ class CurrentWeatherView(BaseWeatherMixin, APIView):
 
 
 class ForecastWeatherView(BaseWeatherMixin, APIView):
+    """View for precessing requests for forecast weather."""
 
     def get(self, request):
         city = request.query_params.get('city')
