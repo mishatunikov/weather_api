@@ -82,7 +82,7 @@ class BaseWeatherMixin:
             return data, None
         except Exception:
             return None, Response(
-                {'message': 'Ошибка при парсинге данных с погодного API'},
+                {'message': 'Error parsing data with weather API'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -106,7 +106,7 @@ class BaseWeatherMixin:
             response = self.get_forecast(city, days_count, current_weather)
         except LocationError:
             return None, Response(
-                {'message': 'Локация не найдена.'},
+                {'message': 'Location not found.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
         return self.parse_weather_response(response)
@@ -120,7 +120,7 @@ class CurrentWeatherView(BaseWeatherMixin, APIView):
 
         if not city:
             return Response(
-                {'message': 'Не передан обязательный параметр city.'},
+                {'message': 'The required parameter city was not passed'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
