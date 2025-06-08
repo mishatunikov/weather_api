@@ -12,19 +12,10 @@ class DjangoSetting:
 
 
 @dataclass
-class OpenWeather:
-    """OpenWeather configuration data."""
-
-    api_key: str
-    url: str
-
-
-@dataclass
 class Config:
     """Project configration data."""
 
     django_settings: DjangoSetting
-    open_weather: OpenWeather
 
 
 def load_config() -> Config:
@@ -36,10 +27,6 @@ def load_config() -> Config:
         DjangoSetting(
             secret_key=env.str('SECRET_KEY', 'SECRET_KEY'),
             debug=env.bool('DEBUG'),
-        ),
-        OpenWeather(
-            api_key=env.str('open_weather_key'),
-            url=env.str('open_weather_url')
         ),
     )
 
