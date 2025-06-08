@@ -147,6 +147,12 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
     def get(self, request):
         city = request.query_params.get('city')
         date = request.query_params.get('date')
+
+        serializer = ForecastQueryParamsSerializer(
+            data={'city': city, 'date': date}
+        )
+        serializer.is_valid(raise_exception=True)
+
         forecast_response = Forecast.objects.filter(
             name=city, date=datetime.strptime(date, consts.DATE_FORMAT)
         )
@@ -157,12 +163,10 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
                 status=status.HTTP_200_OK,
             )
 
-        serializer = ForecastQueryParamsSerializer(
-            data={'city': city, 'date': date}
-        )
-        serializer.is_valid(raise_exception=True)
         diff = (serializer.validated_data['date'] - timezone.now().date()).days
-        data, error_response = self.get_validated_forecast(city, 11)
+        data, error_response = self.get_validated_forecast(
+            city, consts.REQUIRED_FORECAST_DAYS
+        )
 
         if error_response:
             return error_response
@@ -179,14 +183,7 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
         )
 
     def post(self, request):
-        serializer = ForecastWriteSerializer(
-            data={
-                'name': request.query_params['city'],
-                'date': request.query_params['date'],
-                'min_temperature': request.query_params['min_temperature'],
-                'max_temperature': request.query_params['max_temperature'],
-            },
-        )
+        serializer = ForecastWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
