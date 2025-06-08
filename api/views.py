@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests
 from django.utils import timezone
 from geopy.geocoders import Nominatim
@@ -5,8 +7,14 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api import consts
 from api.exeptions import LocationError
-from api.serializers import ForecastGetSerializer
+from api.serializers import (
+    ForecastQueryParamsSerializer,
+    ForecastReadSerializer,
+    ForecastWriteSerializer,
+)
+from weather.models import Forecast
 
 
 class BaseWeatherMixin:
@@ -29,7 +37,7 @@ class BaseWeatherMixin:
         """
         geolocator = Nominatim(user_agent='weather_api')
 
-        location = geolocator.geocode(city_name, language='ru')
+        location = geolocator.geocode(city_name)
         if not location:
             raise LocationError
 
@@ -62,10 +70,7 @@ class BaseWeatherMixin:
             or None and DRF Response on failure.
         """
         if response.status_code != status.HTTP_200_OK:
-            return None, Response(
-                response.json(),
-                status=response.status_code
-            )
+            return None, Response(response.json(), status=response.status_code)
 
         try:
             data = response.json()
@@ -73,7 +78,7 @@ class BaseWeatherMixin:
         except Exception:
             return None, Response(
                 {'message': 'Ошибка при парсинге данных с погодного API'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def get_validated_forecast(self, city: str, days_count: int):
@@ -93,7 +98,7 @@ class BaseWeatherMixin:
         except LocationError:
             return None, Response(
                 {'message': 'Локация не найдена.'},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
         return self.parse_weather_response(response)
 
@@ -133,7 +138,19 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
     def get(self, request):
         city = request.query_params.get('city')
         date = request.query_params.get('date')
-        serializer = ForecastGetSerializer(data={'city': city, 'date': date})
+        forecast_response = Forecast.objects.filter(
+            name=city, date=datetime.strptime(date, consts.DATE_FORMAT)
+        )
+
+        if forecast_response.exists():
+            return Response(
+                data=ForecastReadSerializer(forecast_response.first()).data,
+                status=status.HTTP_200_OK,
+            )
+
+        serializer = ForecastQueryParamsSerializer(
+            data={'city': city, 'date': date}
+        )
         serializer.is_valid(raise_exception=True)
         diff = (serializer.validated_data['date'] - timezone.now().date()).days
         data, error_response = self.get_validated_forecast(city, 11)
@@ -153,4 +170,14 @@ class ForecastWeatherView(BaseWeatherMixin, APIView):
         )
 
     def post(self, request):
-        pass
+        serializer = ForecastWriteSerializer(
+            data={
+                'name': request.query_params['city'],
+                'date': request.query_params['date'],
+                'min_temperature': request.query_params['min_temperature'],
+                'max_temperature': request.query_params['max_temperature'],
+            },
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
