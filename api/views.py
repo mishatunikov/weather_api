@@ -21,13 +21,17 @@ class BaseWeatherMixin:
     """Mixin to work with weather forecast through open-meteo."""
 
     @staticmethod
-    def get_forecast(city_name: str, days_count: int):
+    def get_forecast(
+        city_name: str, days_count: int, current_weather: bool = False
+    ):
         """
         Fetches daily weather forecast from Open-Meteo API.
 
         Args:
             city_name (str): Name of the city to fetch forecast for.
             days_count (int): Number of forecast days (max 16 supported).
+            current_weather (bool): Flag for include data about the present
+                time.
 
         Raises:
             LocationError: If the city cannot be geocoded.
@@ -51,6 +55,7 @@ class BaseWeatherMixin:
                 'daily': 'temperature_2m_min,temperature_2m_max',
                 'timezone': 'auto',
                 'forecast_days': days_count,
+                'current_weather': current_weather,
             },
         )
 
@@ -81,20 +86,24 @@ class BaseWeatherMixin:
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    def get_validated_forecast(self, city: str, days_count: int):
+    def get_validated_forecast(
+        self, city: str, days_count: int, current_weather: bool = False
+    ):
         """
         Validates city and fetches weather data from Open-Meteo API.
 
         Args:
             city (str): City name.
             days_count (int): Number of forecast days.
+            current_weather (bool): Flag for include data about the present
+                time.
 
         Returns:
             Tuple[dict | None, Response | None]: Parsed forecast data or error
             response.
         """
         try:
-            response = self.get_forecast(city, days_count)
+            response = self.get_forecast(city, days_count, current_weather)
         except LocationError:
             return None, Response(
                 {'message': 'Локация не найдена.'},
@@ -115,18 +124,18 @@ class CurrentWeatherView(BaseWeatherMixin, APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data, error_response = self.get_validated_forecast(city, 1)
+        data, error_response = self.get_validated_forecast(city, 1, True)
 
         if error_response:
             return error_response
 
-        min_temp = data['daily']['temperature_2m_min'][0]
-        max_temp = data['daily']['temperature_2m_max'][0]
+        temperature = data['current_weather']['temperature']
+        time = data['current_weather']['time'][-5:]
 
         return Response(
             data={
-                'min_temperature': min_temp,
-                'max_temperature': max_temp,
+                'temperature': temperature,
+                'local_time': time,
             },
             status=status.HTTP_200_OK,
         )
