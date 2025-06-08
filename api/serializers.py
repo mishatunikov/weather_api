@@ -56,7 +56,15 @@ class ForecastWriteSerializer(DateSerializer, serializers.ModelSerializer):
         fields = ('city', 'date', 'min_temperature', 'max_temperature')
         validators = [
             UniqueTogetherValidator(
-                queryset=Forecast.objects.all(),
-                fields=('city', 'date')
+                queryset=Forecast.objects.all(), fields=('city', 'date')
             )
         ]
+
+    def validate(self, data):
+        if data['min_temperature'] > data['max_temperature']:
+            raise ValidationError(
+                detail={
+                    'message': 'min_temperature can not be more then '
+                    'max_temperature.'
+                }
+            )
