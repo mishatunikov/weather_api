@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from weather.models import Forecast
+
+admin.site.register(Forecast)
