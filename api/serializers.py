@@ -5,10 +5,12 @@ from rest_framework import serializers
 from rest_framework.validators import ValidationError
 
 from api import consts
+from weather.models import Forecast
 
 
-class ForecastGetSerializer(serializers.Serializer):
-    city = serializers.CharField(required=True)
+class DateSerializer(serializers.Serializer):
+    """Serializer with date field."""
+
     date = serializers.DateField(
         required=True,
         format=consts.DATE_FORMAT,
@@ -32,5 +34,23 @@ class ForecastGetSerializer(serializers.Serializer):
         return value
 
 
-class ForecastCreateSerializer(serializers.ModelSerializer):
-    pass
+class ForecastQueryParamsSerializer(DateSerializer):
+    """Serializer for validate forecast query param."""
+
+    city = serializers.CharField(required=True)
+
+
+class ForecastReadSerializer(serializers.ModelSerializer):
+    """Serializer for representation data of the Forecast Model."""
+
+    class Meta:
+        model = Forecast
+        fields = ('min_temperature', 'max_temperature')
+
+
+class ForecastWriteSerializer(DateSerializer, serializers.ModelSerializer):
+    """Serializer create instance of the Forecast Model."""
+
+    class Meta:
+        model = Forecast
+        fields = ('name', 'date', 'min_temperature', 'max_temperature')
