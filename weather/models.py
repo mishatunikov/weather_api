@@ -5,7 +5,7 @@ from weather.validators import temperature_validators
 
 
 class Forecast(models.Model):
-    name = models.CharField(
+    city = models.CharField(
         max_length=consts.MAX_NAME_LENGTH, verbose_name='название'
     )
     date = models.DateField(verbose_name='дата прогноза')
@@ -22,9 +22,9 @@ class Forecast(models.Model):
         ordering = ('-date',)
         constraints = [
             models.UniqueConstraint(
-                fields=('name', 'date'), name='unique_weather_forecast'
+                fields=('city', 'date'), name='unique_weather_forecast'
             ),
         ]
 
     def __str__(self):
-        return f'{self.name}|{self.date}'
+        return f'{self.city}|{self.date}'
