@@ -5,7 +5,7 @@ target-version = ['py39']
 
 [tool.isort]
 py_version = 39
-src_paths = ['django_backend', 'shop_bot']
+src_paths = ['api', 'weather', 'weather_api']
 profile = 'black'
-skip = ['migrations', 'venv', 'requests.py']
+skip = ['migrations', 'venv',]
 line_length=79
