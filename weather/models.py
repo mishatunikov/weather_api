@@ -20,6 +20,8 @@ class Forecast(models.Model):
 
     class Meta:
         ordering = ('-date',)
+        verbose_name = 'city'
+        verbose_name_plural = 'cities'
 
     def __str__(self):
         return f'{self.city}|{self.date}'
