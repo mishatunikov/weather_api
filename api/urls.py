@@ -5,5 +5,5 @@ from api.views import CurrentWeatherView, ForecastWeatherView
 
 urlpatterns = [
     path('weather/current/', CurrentWeatherView.as_view()),
-    path('weather/forcast/', ForecastWeatherView.as_view()),
+    path('weather/forecast/', ForecastWeatherView.as_view()),
 ]
