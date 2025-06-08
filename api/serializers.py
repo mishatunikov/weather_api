@@ -54,11 +54,6 @@ class ForecastWriteSerializer(DateSerializer, serializers.ModelSerializer):
     class Meta:
         model = Forecast
         fields = ('city', 'date', 'min_temperature', 'max_temperature')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Forecast.objects.all(), fields=('city', 'date')
-            )
-        ]
 
     def validate(self, data):
         if data['min_temperature'] > data['max_temperature']:

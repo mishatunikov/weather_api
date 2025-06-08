@@ -6,25 +6,20 @@ from weather.validators import temperature_validators
 
 class Forecast(models.Model):
     city = models.CharField(
-        max_length=consts.MAX_NAME_LENGTH, verbose_name='название'
+        max_length=consts.MAX_NAME_LENGTH, verbose_name='name of location'
     )
-    date = models.DateField(verbose_name='дата прогноза')
+    date = models.DateField(verbose_name='date')
     min_temperature = models.FloatField(
-        verbose_name='минимальная температура',
+        verbose_name='minimal temperature',
         validators=temperature_validators,
     )
     max_temperature = models.FloatField(
-        verbose_name='максимальная температура',
+        verbose_name='maximum temperature',
         validators=temperature_validators,
     )
 
     class Meta:
         ordering = ('-date',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=('city', 'date'), name='unique_weather_forecast'
-            ),
-        ]
 
     def __str__(self):
         return f'{self.city}|{self.date}'
